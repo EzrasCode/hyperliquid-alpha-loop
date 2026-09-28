@@ -1,5 +1,9 @@
 name: Alpha Loop Cycle
 
+# Re-registered 2026-09-28 04:10 UTC -- the schedule trigger below hadn't
+# self-fired after ~50 minutes despite Actions permissions, default branch,
+# and workflow "active" state all checking out. Touching this file is a
+# known nudge for GitHub's scheduler to re-evaluate the cron trigger.
 on:
   schedule:
     # Offset off the round 5-minute mark on purpose: GitHub's own docs warn
