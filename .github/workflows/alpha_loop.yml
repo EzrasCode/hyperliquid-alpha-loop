@@ -2,7 +2,12 @@ name: Alpha Loop Cycle
 
 on:
   schedule:
-    - cron: "*/5 * * * *"
+    # Offset off the round 5-minute mark on purpose: GitHub's own docs warn
+    # that "*/5 * * * *" is the single most congested schedule slot, since
+    # nearly every repo on the platform picks that exact pattern, and
+    # queues runs behind all of them (sometimes for a very long time). This
+    # still runs every 5 minutes, just not exactly on :00/:05/:10/etc.
+    - cron: "3-59/5 * * * *"
   workflow_dispatch: {}
 
 permissions:
