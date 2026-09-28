@@ -8,40 +8,41 @@ cron schedule, each run doing exactly one cycle against a fresh checkout:
     python -m alpha_loop.loop --once
 
 `--once` is the only mode used in production; the plain `while True` form
-below exists for local development where you want it to keep running without
-re-invoking python each time.
+below exists for local development.
 
 Each cycle:
   1. Pull one shared data bundle (prices, HLP sentiment, liquidation totals,
      smart-money signals, ticks, per-exchange liquidations) -- shared across
      all hypotheses so we don't refetch the same endpoint N times.
   2. Snapshot prices for the universe into the price panel (this loop's own
-     accumulating history, since the API's own history is shallow -- see
-     backtest_engine.py's docstring).
-  3. Evaluate every active hypothesis against the bundle; record an event for
-     each one that fired.
-  4. Resolve any (event, horizon) pairs whose forward-return window has now
-     elapsed, using the accumulated price panel.
-  5. Every IDEA_GEN_EVERY_N_CYCLES, ask the idea generator for new
-     hypothesis parameterizations and store any that validate and aren't
-     duplicates.
-  6. Append one line to the append-only decision log and post the cycle
-     summary to Discord.
+     accumulating history -- see backtest_engine.py's docstring).
+  3. Evaluate every active hypothesis; for each that fires, tag it with
+     market context (session/regime/vol percentile) and trigger details,
+     and record an event.
+  4. Resolve any (event, horizon) pairs whose forward-return window has
+     elapsed: gross/net return, hit, and MFE/MAE over the accumulated price
+     path between event time and the horizon target.
+  5. Every IDEA_GEN_EVERY_N_CYCLES, ask for new hypothesis parameterizations
+     -- tracking not just how many were accepted, but why any were rejected
+     or why zero came back.
+  6. Every RESEARCH_SCOUT_EVERY_N_CYCLES, check arXiv for new candidate
+     papers.
+  7. Assemble the structured cycle report (reporting.py), append it to
+     cycle_reports.jsonl, write a decision-log line, and post to Discord.
 """
 
 import argparse
+import json
 import sys
 import time
 import traceback
 from datetime import datetime, timedelta, timezone
 
-import numpy as np
-
-from . import config, research_scout, store
-from .backtest_engine import evaluate_hypothesis, summarize_outcomes
+from . import config, market_context, reporting, research_scout, store
+from .backtest_engine import compute_mfe_mae, evaluate_hypothesis
 from .data_cache import CachedMoonDevAPI
 from .discord_notify import send_cycle_summary, send_research_leads
-from .hypothesis_bank import HORIZONS_MINUTES, SEED_HYPOTHESES
+from .hypothesis_bank import HORIZONS_MINUTES, SEED_HYPOTHESES, extract_trigger_fields
 from .idea_generator import propose_new_hypotheses
 
 
@@ -54,6 +55,11 @@ def fetch_bundle(api: CachedMoonDevAPI) -> dict:
         for coin, price in (prices_resp.get("prices") or {}).items()
         if coin in config.UNIVERSE
     }
+    bundle["funding_rates"] = {
+        coin: prices_resp.get("funding_rates", {}).get(coin)
+        for coin in config.UNIVERSE
+    }
+    bundle["prices_timestamp"] = prices_resp.get("timestamp")
 
     bundle["hlp_sentiment"] = api.call("get_hlp_sentiment") or {}
     bundle["liquidation_totals"] = api.call("get_all_liquidation_totals") or {}
@@ -63,9 +69,12 @@ def fetch_bundle(api: CachedMoonDevAPI) -> dict:
         bundle["smart_money_signals"][tf] = api.call("get_smart_money_signals", tf) or {}
 
     bundle["ticks"] = {}
+    bundle["tick_counts"] = {}
     for coin in config.UNIVERSE:
         tick_resp = api.call("get_ticks", coin, "1h", limit=5000) or {}
-        bundle["ticks"][coin] = {"1h": tick_resp.get("ticks", [])}
+        ticks = tick_resp.get("ticks", [])
+        bundle["ticks"][coin] = {"1h": ticks}
+        bundle["tick_counts"][coin] = len(ticks)
 
     bundle["exchange_liquidations"] = {}
     for exchange, method in (
@@ -83,6 +92,7 @@ def fetch_bundle(api: CachedMoonDevAPI) -> dict:
 
 def resolve_due_outcomes(conn, now: datetime):
     rows = store.unresolved_event_horizons(conn)
+    resolved_count = 0
     for row in rows:
         event_id = row["event_id"]
         event_time = datetime.fromisoformat(row["event_time"])
@@ -100,41 +110,38 @@ def resolve_due_outcomes(conn, now: datetime):
             price_at_event = row["price_at_event"]
             forward_return = (forward_price / price_at_event) - 1.0
             predicted_up = row["predicted_direction"] == "up"
+            gross_return = forward_return if predicted_up else -forward_return
+            net_return = gross_return - config.ROUND_TRIP_COST_FRACTION
             hit = (forward_return > 0) == predicted_up
-            signed_return = forward_return if predicted_up else -forward_return
-            store.record_outcome(conn, event_id, horizon, forward_price, signed_return, hit)
 
+            path = store.price_path_between(conn, row["coin"], row["event_time"], target_time.isoformat())
+            excursion = compute_mfe_mae(row["event_time"], path, price_at_event, row["predicted_direction"])
 
-def cycle_summary_text(conn) -> str:
-    lines = []
-    for h in store.active_hypotheses(conn):
-        for horizon in HORIZONS_MINUTES:
-            outcomes = store.outcomes_for_hypothesis(conn, h.id, horizon)
-            if not outcomes:
-                continue
-            returns = np.array([o["forward_return"] for o in outcomes])
-            hits = np.array([bool(o["hit"]) for o in outcomes])
-            stats = summarize_outcomes(returns, hits)
-            lines.append(
-                f"{h.name} [{horizon}]: n={stats['n']} hit_rate={stats['hit_rate']:.2f} "
-                f"mean_return={stats['mean_return']:+.4f} t={stats['t_stat']:.2f}"
+            store.record_outcome(
+                conn, event_id, horizon, forward_price, gross_return, net_return, hit,
+                mfe=excursion["mfe"], mae=excursion["mae"],
+                time_to_mfe_minutes=excursion["time_to_mfe_minutes"],
+                time_to_mae_minutes=excursion["time_to_mae_minutes"],
             )
-    return "\n".join(lines) if lines else "no resolved outcomes yet"
+            resolved_count += 1
+    return resolved_count
 
 
 def run_cycle(api: CachedMoonDevAPI, cycle: int):
-    now = datetime.now(timezone.utc)
+    fetch_start = datetime.now(timezone.utc)
     with store.connect() as conn:
         for h in SEED_HYPOTHESES:
             store.upsert_hypothesis(conn, h)
 
         bundle = fetch_bundle(api)
+        now = datetime.now(timezone.utc)
 
         for coin, price in bundle["prices"].items():
             store.record_price_snapshot(conn, coin, now.isoformat(), price)
 
-        fired_count = 0
+        fired_count, evaluated_count = 0, 0
         for h in store.active_hypotheses(conn):
+            evaluated_count += 1
             result = evaluate_hypothesis(h, bundle)
             if not result or not result.get("fired"):
                 continue
@@ -142,20 +149,45 @@ def run_cycle(api: CachedMoonDevAPI, cycle: int):
             price = bundle["prices"].get(coin)
             if price is None:
                 continue
+
+            ctx = market_context.market_context(conn, coin, now)
+            ctx["funding_rate"] = bundle["funding_rates"].get(coin)
+            ctx["tick_count"] = bundle["tick_counts"].get(coin)
+            if bundle.get("prices_timestamp"):
+                try:
+                    data_ts = datetime.fromisoformat(str(bundle["prices_timestamp"]).replace("Z", "+00:00"))
+                    ctx["data_latency_ms"] = (now - data_ts).total_seconds() * 1000
+                except ValueError:
+                    ctx["data_latency_ms"] = None
+
+            trigger_value, trigger_threshold, trigger_zscore = extract_trigger_fields(h, result.get("raw", {}))
+
             store.record_event(
                 conn, h.id, coin, result["direction"], price, result.get("raw", {}),
-                event_time=now.isoformat(),
+                event_time=now.isoformat(), context=ctx,
+                trigger_value=trigger_value, trigger_threshold=trigger_threshold, trigger_zscore=trigger_zscore,
             )
             fired_count += 1
 
-        resolve_due_outcomes(conn, now)
+        resolved_count = resolve_due_outcomes(conn, now)
 
-        new_hypotheses_added = 0
+        hyp_generated = hyp_promoted = 0
+        idea_rejected, why_no_new_leads = [], None
         if cycle % config.IDEA_GEN_EVERY_N_CYCLES == 0:
-            context = cycle_summary_text(conn)
-            for candidate in propose_new_hypotheses(context):
+            context_text = reporting.format_discord_summary(
+                reporting.build_cycle_report(conn, cycle, now.isoformat(), {}, 0, {})
+            )
+            idea_result = propose_new_hypotheses(context_text)
+            hyp_generated = idea_result["raw_count"]
+            idea_rejected = idea_result["rejected"]
+            why_no_new_leads = idea_result["why_no_new_leads"]
+            for candidate in idea_result["accepted"]:
                 if store.upsert_hypothesis(conn, candidate):
-                    new_hypotheses_added += 1
+                    hyp_promoted += 1
+                else:
+                    idea_rejected.append({"item": candidate.name, "reason": "duplicate of existing hypothesis"})
+            if hyp_generated and not hyp_promoted and why_no_new_leads is None:
+                why_no_new_leads = "all accepted candidates were duplicates of existing hypotheses"
 
         new_leads = []
         if cycle % config.RESEARCH_SCOUT_EVERY_N_CYCLES == 0:
@@ -169,13 +201,25 @@ def run_cycle(api: CachedMoonDevAPI, cycle: int):
                 write_research_leads_doc(now, new_leads)
                 send_research_leads(new_leads)
 
-        summary = (
-            f"cycle {cycle}: {fired_count} events fired, "
-            f"{new_hypotheses_added} new hypotheses added, "
-            f"{len(new_leads)} new research leads\n{cycle_summary_text(conn)}"
-        )
+        research_block = {
+            "hypotheses_generated": hyp_generated,
+            "hypotheses_promoted": hyp_promoted,
+            "hypotheses_rejected": idea_rejected,
+            "why_no_new_leads": why_no_new_leads,
+            "new_research_leads": len(new_leads),
+            "compute_budget_used": {
+                "hypotheses_evaluated": evaluated_count,
+                "outcomes_resolved": resolved_count,
+            },
+        }
+        data_window = {"start": fetch_start.isoformat(), "end": now.isoformat()}
+
+        report = reporting.build_cycle_report(conn, cycle, now.isoformat(), data_window, fired_count, research_block)
+        summary = reporting.format_discord_summary(report)
+
         store.append_cycle_log(conn, cycle, summary)
         write_decision_log_entry(now, summary)
+        append_cycle_report_jsonl(report)
         send_cycle_summary(cycle, summary)
         return summary
 
@@ -187,11 +231,19 @@ def write_decision_log_entry(now: datetime, summary: str):
         if header_needed:
             f.write(
                 "# Alpha loop decision log\n\n"
-                "Append-only. One entry per cycle that changed the hypothesis "
-                "bank or moved a hypothesis's stats meaningfully. See "
-                "alpha_loop_overview_20260927.md for methodology.\n\n"
+                "Append-only human-readable summary. The full structured record for "
+                "every cycle (per-strategy statistics, gate reasons, MFE/MAE, research-"
+                "loop transparency) lives in cycle_reports.jsonl -- see "
+                "alpha_loop_overview_20260927.md.\n\n"
             )
         f.write(f"## {now.strftime('%Y-%m-%d %H:%M UTC')}\n\n{summary}\n\n")
+
+
+def append_cycle_report_jsonl(report: dict):
+    path = config.REPO_ROOT / "docs" / "research" / "alpha_loop" / "cycle_reports.jsonl"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "a", encoding="utf-8") as f:
+        f.write(json.dumps(report, default=str) + "\n")
 
 
 def write_research_leads_doc(now: datetime, papers: list):

@@ -15,3 +15,18 @@ Liquidation cascade momentum (5m concentration) [15m]: n=1 hit_rate=1.00 mean_re
 CVD / price divergence (BTC, 1h ticks) [5m]: n=1 hit_rate=0.00 mean_return=-0.0002 t=nan
 CVD / price divergence (BTC, 1h ticks) [15m]: n=1 hit_rate=0.00 mean_return=-0.0002 t=nan
 
+## 2026-09-28: evidence schema upgrade
+
+The two entries above are a perfect example of the problem this fixes: an
+`n=1, hit_rate=1.00, t=nan` line printed with no indication that it means
+nothing. From this point on, every outcome is gated by sample size and
+several other evidence checks before being called anything other than
+"insufficient_n" -- see docs/research/alpha_loop/evidence_schema.md for the
+full schema. `alpha_loop.db` was reset to pick up new columns (event
+context, trigger fields, net return, MFE/MAE) that the old schema didn't
+have; nothing of real value was lost (the two entries above were still
+single-sample noise). Going forward, this file stays a short human-readable
+summary per cycle; the full structured record (every field in the schema
+doc, one JSON object per cycle) lives in `cycle_reports.jsonl`, never
+rewritten.
+

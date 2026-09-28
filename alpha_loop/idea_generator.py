@@ -45,31 +45,39 @@ def _client():
     return OpenAI(api_key=api_key, base_url="https://openrouter.ai/api/v1")
 
 
-def _validate_item(item) -> Hypothesis | None:
+def _validate_item(item) -> "tuple[Hypothesis | None, str | None]":
+    """Returns (hypothesis_or_None, rejection_reason_or_None)."""
     if not isinstance(item, dict):
-        return None
+        return None, "item was not a JSON object"
     kind = item.get("kind")
     coin = item.get("coin")
     params = item.get("params")
     name = item.get("name") or f"generated {kind}"
-    if kind not in KNOWN_KINDS or not isinstance(coin, str) or not isinstance(params, dict):
-        return None
+    if kind not in KNOWN_KINDS:
+        return None, f"unknown kind '{kind}'"
+    if not isinstance(coin, str):
+        return None, "coin was not a string"
+    if not isinstance(params, dict):
+        return None, "params was not an object"
     expected_keys = set(KIND_PARAM_SCHEMA[kind].keys())
     if not expected_keys.issubset(params.keys()):
-        return None
+        return None, f"missing param keys: {expected_keys - params.keys()}"
     for key, value in params.items():
         if key in ("timeframe", "tick_duration") and not isinstance(value, str):
-            return None
+            return None, f"param '{key}' should be a string"
         if key not in ("timeframe", "tick_duration") and not isinstance(value, (int, float)):
-            return None
-    return Hypothesis(name=name, kind=kind, coin=coin.upper(), params=params, source="generated")
+            return None, f"param '{key}' should be numeric"
+    return Hypothesis(name=name, kind=kind, coin=coin.upper(), params=params, source="generated"), None
 
 
-def propose_new_hypotheses(recent_context: str) -> list[Hypothesis]:
-    """Returns a validated list of new Hypothesis objects (possibly empty)."""
+def propose_new_hypotheses(recent_context: str) -> dict:
+    """Returns {"accepted": [Hypothesis, ...], "rejected": [{"item":..., "reason":...}, ...],
+    "raw_count": int, "why_no_new_leads": str|None} -- the transparency the research-loop
+    log needs: a cycle with zero new hypotheses should say WHY, not just report a zero."""
     client = _client()
     if client is None:
-        return []
+        return {"accepted": [], "rejected": [], "raw_count": 0,
+                "why_no_new_leads": "OPENROUTER_API_KEY not set -- idea generation is disabled"}
 
     prompt = (
         "Recent backtest context (hypothesis name -> n samples, hit_rate, mean_return):\n"
@@ -88,8 +96,9 @@ def propose_new_hypotheses(recent_context: str) -> list[Hypothesis]:
             temperature=0.9,
         )
         content = response.choices[0].message.content.strip()
-    except Exception:
-        return []
+    except Exception as exc:
+        return {"accepted": [], "rejected": [], "raw_count": 0,
+                "why_no_new_leads": f"OpenRouter call failed: {exc}"}
 
     content = content.strip("` \n")
     if content.lower().startswith("json"):
@@ -98,14 +107,22 @@ def propose_new_hypotheses(recent_context: str) -> list[Hypothesis]:
     try:
         items = json.loads(content)
     except (json.JSONDecodeError, TypeError):
-        return []
+        return {"accepted": [], "rejected": [], "raw_count": 0,
+                "why_no_new_leads": "model output was not valid JSON"}
 
     if not isinstance(items, list):
-        return []
+        return {"accepted": [], "rejected": [], "raw_count": 0,
+                "why_no_new_leads": "model output was not a JSON array"}
 
-    hypotheses = []
+    accepted, rejected = [], []
     for item in items[: config.IDEA_GEN_MAX_NEW_PER_CALL]:
-        h = _validate_item(item)
+        h, reason = _validate_item(item)
         if h is not None:
-            hypotheses.append(h)
-    return hypotheses
+            accepted.append(h)
+        else:
+            rejected.append({"item": item, "reason": reason})
+
+    why = None
+    if not accepted:
+        why = "all proposed items failed validation" if items else "model returned zero candidates"
+    return {"accepted": accepted, "rejected": rejected, "raw_count": len(items), "why_no_new_leads": why}

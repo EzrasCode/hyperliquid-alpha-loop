@@ -37,9 +37,14 @@ CREATE TABLE IF NOT EXISTS events (
     hypothesis_id TEXT NOT NULL,
     event_time TEXT NOT NULL,
     coin TEXT NOT NULL,
+    source TEXT NOT NULL DEFAULT 'moondev_hyperliquid',
     predicted_direction TEXT NOT NULL,
     price_at_event REAL NOT NULL,
+    trigger_value REAL,
+    trigger_threshold REAL,
+    trigger_zscore REAL,
     raw_json TEXT,
+    context_json TEXT,
     FOREIGN KEY (hypothesis_id) REFERENCES hypotheses(id)
 );
 
@@ -48,7 +53,12 @@ CREATE TABLE IF NOT EXISTS outcomes (
     horizon TEXT NOT NULL,
     forward_price REAL NOT NULL,
     forward_return REAL NOT NULL,
+    net_return REAL NOT NULL,
     hit INTEGER NOT NULL,
+    mfe REAL,
+    mae REAL,
+    time_to_mfe_minutes REAL,
+    time_to_mae_minutes REAL,
     resolved_at TEXT NOT NULL,
     PRIMARY KEY (event_id, horizon)
 );
@@ -122,12 +132,21 @@ def record_price_snapshot(conn, coin, ts, price):
     )
 
 
-def record_event(conn, hypothesis_id, coin, predicted_direction, price_at_event, raw: dict, event_time=None):
+def record_event(
+    conn, hypothesis_id, coin, predicted_direction, price_at_event, raw: dict,
+    event_time=None, context: dict = None, trigger_value=None, trigger_threshold=None,
+    trigger_zscore=None,
+):
     conn.execute(
-        "INSERT INTO events (hypothesis_id, event_time, coin, predicted_direction, price_at_event, raw_json) "
-        "VALUES (?, ?, ?, ?, ?, ?)",
-        (hypothesis_id, event_time or now_iso(), coin, predicted_direction, price_at_event, json.dumps(raw)),
+        "INSERT INTO events (hypothesis_id, event_time, coin, predicted_direction, price_at_event, "
+        "trigger_value, trigger_threshold, trigger_zscore, raw_json, context_json) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        (
+            hypothesis_id, event_time or now_iso(), coin, predicted_direction, price_at_event,
+            trigger_value, trigger_threshold, trigger_zscore, json.dumps(raw), json.dumps(context or {}),
+        ),
     )
+    return conn.execute("SELECT last_insert_rowid() AS id").fetchone()["id"]
 
 
 def unresolved_event_horizons(conn):
@@ -155,11 +174,24 @@ def nearest_price_at_or_after(conn, coin, target_ts_iso):
     return (row["ts"], row["price"]) if row else None
 
 
-def record_outcome(conn, event_id, horizon, forward_price, forward_return, hit):
+def price_path_between(conn, coin, start_ts_iso, end_ts_iso):
+    """Every price_snapshot for coin in [start, end], chronological -- the
+    loop's own accumulated intra-horizon path, used for MFE/MAE."""
+    rows = conn.execute(
+        "SELECT ts, price FROM price_snapshots WHERE coin = ? AND ts >= ? AND ts <= ? ORDER BY ts ASC",
+        (coin, start_ts_iso, end_ts_iso),
+    ).fetchall()
+    return [(r["ts"], r["price"]) for r in rows]
+
+
+def record_outcome(conn, event_id, horizon, forward_price, forward_return, net_return, hit, mfe=None, mae=None,
+                    time_to_mfe_minutes=None, time_to_mae_minutes=None):
     conn.execute(
-        "INSERT OR REPLACE INTO outcomes (event_id, horizon, forward_price, forward_return, hit, resolved_at) "
-        "VALUES (?, ?, ?, ?, ?, ?)",
-        (event_id, horizon, forward_price, forward_return, int(hit), now_iso()),
+        "INSERT OR REPLACE INTO outcomes (event_id, horizon, forward_price, forward_return, net_return, hit, "
+        "mfe, mae, time_to_mfe_minutes, time_to_mae_minutes, resolved_at) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        (event_id, horizon, forward_price, forward_return, net_return, int(hit), mfe, mae,
+         time_to_mfe_minutes, time_to_mae_minutes, now_iso()),
     )
 
 
@@ -179,12 +211,16 @@ def record_research_lead(conn, arxiv_id, title, summary, link, published) -> boo
 
 
 def outcomes_for_hypothesis(conn, hypothesis_id, horizon):
+    """Chronologically ordered (by event_time) -- callers doing sub-period
+    sign-consistency checks or MFE/MAE time-series analysis rely on order."""
     rows = conn.execute(
         """
-        SELECT o.forward_return AS forward_return, o.hit AS hit
+        SELECT o.forward_return AS forward_return, o.net_return AS net_return, o.hit AS hit,
+               o.mfe AS mfe, o.mae AS mae, e.context_json AS context_json, e.event_time AS event_time
         FROM outcomes o
         JOIN events e ON e.id = o.event_id
         WHERE e.hypothesis_id = ? AND o.horizon = ?
+        ORDER BY e.event_time ASC
         """,
         (hypothesis_id, horizon),
     ).fetchall()

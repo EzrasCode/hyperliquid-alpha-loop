@@ -99,6 +99,25 @@ SEED_HYPOTHESES = [
 
 # Documents each kind's expected params for idea_generator.py's prompt and
 # for validating LLM-proposed parameterizations before they're stored.
+def extract_trigger_fields(hypothesis: "Hypothesis", raw: dict):
+    """Best-effort (trigger_value, trigger_threshold, trigger_zscore) for the
+    event-context block, per evaluator kind. Not every kind has a natural
+    zscore -- those get None rather than a fabricated number."""
+    kind, params = hypothesis.kind, hypothesis.params
+    if kind == "hlp_sentiment_threshold":
+        z = raw.get("z_score")
+        return z, params.get("z_threshold"), z
+    if kind == "liq_momentum":
+        return raw.get("vol_5m"), params.get("min_5m_usd"), None
+    if kind == "smart_money_top":
+        return raw.get("confidence"), params.get("min_confidence"), None
+    if kind == "cvd_divergence":
+        return raw.get("cvd"), params.get("min_abs_cvd"), None
+    if kind == "cross_exchange_liq_leadlag":
+        return raw.get("binance_usd"), params.get("min_binance_usd"), None
+    return None, None, None
+
+
 KIND_PARAM_SCHEMA = {
     "hlp_sentiment_threshold": {"z_threshold": "float, e.g. 1.5-3.0"},
     "liq_momentum": {

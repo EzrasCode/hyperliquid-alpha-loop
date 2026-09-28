@@ -57,3 +57,43 @@ IDEA_GEN_MODEL = "anthropic/claude-sonnet-4"
 MAX_REQUESTS_PER_MINUTE = 120
 RETRY_MAX_ATTEMPTS = 4
 RETRY_BASE_BACKOFF_SECONDS = 2.0
+
+# --- Statistical validity gates (see docs/research/alpha_loop/evidence_schema.md) ---
+# Below MIN_N, a hit rate or mean return is noise, not a finding -- the report
+# and Discord output mark these "insufficient_n" instead of printing a number
+# that looks meaningful. 30 is the conventional rule-of-thumb minimum sample
+# size for the normal approximation to the t-distribution to be reasonable.
+MIN_N_FOR_SIGNIFICANCE = 30
+MIN_ABS_T_STAT = 2.0
+MIN_MFE_MAE_RATIO = 1.5
+MAX_BOOTSTRAP_P = 0.05
+BOOTSTRAP_ITERATIONS = 2000
+BOOTSTRAP_BLOCK_SIZE = 5  # contiguous-block resampling to respect autocorrelation
+
+# Explicit execution-cost assumptions, separate from each other so gross vs.
+# net is never ambiguous in the output (same "state your fee assumption"
+# convention as the funding-carry analysis this project is built alongside).
+TAKER_FEE_BPS = 4.5     # Hyperliquid taker fee, one side
+SLIPPAGE_BPS = 2.0       # modeled, not measured -- no live fills exist yet
+ROUND_TRIP_COST_FRACTION = 2 * (TAKER_FEE_BPS + SLIPPAGE_BPS) / 10_000
+
+# Kept for backward compatibility with earlier runs' stored assumption.
+ROUND_TRIP_FEE_FRACTION = ROUND_TRIP_COST_FRACTION
+
+# Simplified trading-session buckets (UTC hour ranges) for conditioning
+# hypothesis stats by session -- see market_context.py.
+SESSION_WINDOWS_UTC = [
+    ("Asia", 0, 8),
+    ("London", 8, 13),
+    ("NY", 13, 21),
+    ("Late", 21, 24),
+]
+
+# How many hours of this loop's own accumulated price panel to use for the
+# realized-vol/regime heuristic, and how many historical comparison windows
+# are required before a percentile/regime label is trusted rather than
+# reported as "insufficient_history". The loop has no deep historical data
+# (see backtest_engine.py's docstring) so both numbers start small and this
+# context enrichment genuinely only becomes meaningful after days of running.
+VOL_LOOKBACK_HOURS = 1
+MIN_HISTORY_WINDOWS_FOR_PERCENTILE = 10
