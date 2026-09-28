@@ -65,6 +65,13 @@ RETRY_BASE_BACKOFF_SECONDS = 2.0
 # size for the normal approximation to the t-distribution to be reasonable.
 MIN_N_FOR_SIGNIFICANCE = 30
 MIN_ABS_T_STAT = 2.0
+
+# A softer "worth watching" bar for hypotheses still below MIN_N_FOR_SIGNIFICANCE
+# -- distinguishes "too early to know, but trending real" from "too early to
+# know, and currently looks like nothing" instead of lumping both into one
+# uninformative "insufficient_n" bucket. Still never called a finding.
+MIN_N_FOR_WATCHLIST = 5
+WATCHLIST_MIN_ABS_T = 1.0
 MIN_MFE_MAE_RATIO = 1.5
 MAX_BOOTSTRAP_P = 0.05
 BOOTSTRAP_ITERATIONS = 2000

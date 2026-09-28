@@ -377,8 +377,16 @@ def evaluate_evidence(
     if not consistent:
         reasons.append("sign_inconsistent_across_subperiods")
 
-    result["status"] = "insufficient_n" if n < config.MIN_N_FOR_SIGNIFICANCE else (
-        "meets_all_gates" if not reasons else "insufficient_evidence"
-    )
+    if n < config.MIN_N_FOR_SIGNIFICANCE:
+        is_watchlist = (
+            n >= config.MIN_N_FOR_WATCHLIST
+            and t_status == "computed" and t is not None and not math.isnan(t)
+            and abs(t) >= config.WATCHLIST_MIN_ABS_T
+            and result["mean_return_net"] > 0
+            and hit_rate > 0.5
+        )
+        result["status"] = "insufficient_n_but_promising" if is_watchlist else "insufficient_n"
+    else:
+        result["status"] = "meets_all_gates" if not reasons else "insufficient_evidence"
     result["gate_failure_reasons"] = reasons
     return result

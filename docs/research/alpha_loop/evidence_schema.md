@@ -78,7 +78,13 @@ average.
 ## Gating
 
 A row is `insufficient_n` below `MIN_N_FOR_SIGNIFICANCE` (30), full stop --
-none of the other gates are even worth checking yet. Above that, it's
+none of the other gates are even worth checking yet -- **unless** it also
+clears a softer watch-list bar (`n >= MIN_N_FOR_WATCHLIST` (5),
+`|t| >= WATCHLIST_MIN_ABS_T` (1.0), positive net return, hit rate > 50%), in
+which case it's `insufficient_n_but_promising` instead. This exists so an
+early signal that's trending real doesn't get buried in the same bucket as
+one that's already flat -- it is still not a claim the signal works, only
+that it's worth watching as more samples accumulate. Above n=30, it's
 `meets_all_gates` only if ALL of: `|t_stat| >= MIN_ABS_T_STAT`,
 `mean_return_net > 0`, `mfe_mae_ratio > MIN_MFE_MAE_RATIO`,
 `bootstrap_p < MAX_BOOTSTRAP_P`, and `sign_consistent_subperiods`. Otherwise

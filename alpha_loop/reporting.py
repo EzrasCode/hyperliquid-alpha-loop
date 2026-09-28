@@ -13,7 +13,14 @@ from . import store
 from .backtest_engine import evaluate_evidence
 from .hypothesis_bank import HORIZONS_MINUTES
 
-STATUS_MARKER = {"meets_all_gates": "✅", "insufficient_evidence": "⚠️", "insufficient_n": "·"}
+STATUS_MARKER = {
+    "meets_all_gates": "✅",
+    "insufficient_n_but_promising": "\U0001f440",  # 👀 -- worth watching, not yet proven
+    "insufficient_evidence": "⚠️",
+    "insufficient_n": "·",
+}
+STATUS_ORDER = {"meets_all_gates": 0, "insufficient_n_but_promising": 1, "insufficient_evidence": 2,
+                "insufficient_n": 3, "no_data": 4}
 
 
 def build_strategy_reports(conn):
@@ -68,7 +75,7 @@ def format_discord_summary(report: dict) -> str:
         lines.append("no resolved outcomes yet")
         return "\n".join(lines)
 
-    for s in sorted(report["strategies"], key=lambda r: (r["status"] != "meets_all_gates", -r["n"])):
+    for s in sorted(report["strategies"], key=lambda r: (STATUS_ORDER.get(r["status"], 9), -r["n"])):
         marker = STATUS_MARKER.get(s["status"], "?")
         hit = f"{s['hit_rate']*100:.0f}%" if s.get("hit_rate") is not None else "n/a"
         lines.append(

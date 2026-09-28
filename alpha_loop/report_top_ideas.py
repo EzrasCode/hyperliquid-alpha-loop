@@ -16,9 +16,7 @@ import numpy as np
 from . import store
 from .backtest_engine import evaluate_evidence
 from .hypothesis_bank import HORIZONS_MINUTES
-from .reporting import build_strategy_reports
-
-STATUS_ORDER = {"meets_all_gates": 0, "insufficient_evidence": 1, "insufficient_n": 2, "no_data": 3}
+from .reporting import STATUS_ORDER, build_strategy_reports
 
 
 def print_leaderboard(conn):
