@@ -21,6 +21,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 
 DB_PATH = Path(__file__).resolve().parent / "alpha_loop.db"
 DECISION_LOG_PATH = REPO_ROOT / "docs" / "research" / "alpha_loop" / "decision_log.md"
+RESEARCH_LEADS_DOC_PATH = REPO_ROOT / "docs" / "research" / "alpha_loop" / "research_leads.md"
 
 # How often the loop pulls fresh data and evaluates hypotheses. 5 minutes
 # matches the shortest forward-return horizon (HORIZONS_MINUTES in
@@ -32,6 +33,10 @@ CYCLE_INTERVAL_SECONDS = 300
 # * 5 min = hourly) -- keeps OpenRouter cost bounded on a 24/7 process.
 IDEA_GEN_EVERY_N_CYCLES = 12
 IDEA_GEN_MAX_NEW_PER_CALL = 3
+
+# How often to check arXiv for new relevant papers (12 cycles * 5 min =
+# hourly, same cadence as idea generation -- see research_scout.py).
+RESEARCH_SCOUT_EVERY_N_CYCLES = 12
 
 # Universe this loop watches. Matches Ideas.md's own BTC-centric live setup
 # plus the handful of coins the order-flow/tick endpoints actually cover.

@@ -35,3 +35,34 @@ def send_cycle_summary(cycle: int, summary: str):
         requests.post(webhook_url, json=payload, timeout=15)
     except requests.RequestException:
         pass
+
+
+def send_research_leads(papers: list):
+    """papers: list of dicts from research_scout.fetch_candidate_papers()."""
+    webhook_url = os.getenv("DISCORD_WEBHOOK_URL")
+    if not webhook_url or not papers:
+        return
+
+    blocks = []
+    for p in papers:
+        snippet = p["summary"][:220] + ("..." if len(p["summary"]) > 220 else "")
+        blocks.append(f"**{p['title']}**\n{snippet}\n{p['link']}")
+    description = "\n\n".join(blocks)
+    if len(description) > MAX_DESCRIPTION_LEN:
+        description = description[:MAX_DESCRIPTION_LEN] + "\n... (truncated)"
+    description += "\n\n_Not yet converted to a testable signal -- needs manual review._"
+
+    payload = {
+        "username": "Alpha Loop",
+        "embeds": [
+            {
+                "title": f"\U0001f4da New research lead(s) -- {len(papers)} paper(s)",
+                "description": description,
+                "color": 0x3498DB,
+            }
+        ],
+    }
+    try:
+        requests.post(webhook_url, json=payload, timeout=15)
+    except requests.RequestException:
+        pass

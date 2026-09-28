@@ -61,6 +61,19 @@ numbers/coins, never code. The loop never `eval()`s or `exec()`s anything an
 LLM produces. Adding a genuinely new signal kind requires a human to write a
 new evaluator function in `alpha_loop/backtest_engine.py`.
 
+## Research scouting (arXiv)
+
+Every hour, alongside idea generation, `research_scout.py` queries arXiv's
+free public API for recent papers in quant-finance categories matching
+keywords relevant to this loop's signals (liquidation, order flow, market
+microstructure, momentum/mean-reversion, cointegration). New papers (deduped
+by arXiv ID) are posted to Discord and appended to
+`docs/research/alpha_loop/research_leads.md`. Google Scholar has no API and
+blocks automated scraping, so arXiv is the free substitute -- and it's
+actually where most of this research shows up first anyway. Same safety
+boundary as idea generation: a paper is a human-readable lead, never
+auto-converted into a running signal.
+
 ## Deployment
 
 `.github/workflows/alpha_loop.yml` runs every 5 minutes: checks out the

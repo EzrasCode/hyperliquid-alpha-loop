@@ -37,10 +37,10 @@ from datetime import datetime, timedelta, timezone
 
 import numpy as np
 
-from . import config, store
+from . import config, research_scout, store
 from .backtest_engine import evaluate_hypothesis, summarize_outcomes
 from .data_cache import CachedMoonDevAPI
-from .discord_notify import send_cycle_summary
+from .discord_notify import send_cycle_summary, send_research_leads
 from .hypothesis_bank import HORIZONS_MINUTES, SEED_HYPOTHESES
 from .idea_generator import propose_new_hypotheses
 
@@ -157,9 +157,22 @@ def run_cycle(api: CachedMoonDevAPI, cycle: int):
                 if store.upsert_hypothesis(conn, candidate):
                     new_hypotheses_added += 1
 
+        new_leads = []
+        if cycle % config.RESEARCH_SCOUT_EVERY_N_CYCLES == 0:
+            for paper in research_scout.fetch_candidate_papers():
+                if store.record_research_lead(
+                    conn, paper["arxiv_id"], paper["title"], paper["summary"],
+                    paper["link"], paper["published"],
+                ):
+                    new_leads.append(paper)
+            if new_leads:
+                write_research_leads_doc(now, new_leads)
+                send_research_leads(new_leads)
+
         summary = (
             f"cycle {cycle}: {fired_count} events fired, "
-            f"{new_hypotheses_added} new hypotheses added\n{cycle_summary_text(conn)}"
+            f"{new_hypotheses_added} new hypotheses added, "
+            f"{len(new_leads)} new research leads\n{cycle_summary_text(conn)}"
         )
         store.append_cycle_log(conn, cycle, summary)
         write_decision_log_entry(now, summary)
@@ -179,6 +192,23 @@ def write_decision_log_entry(now: datetime, summary: str):
                 "alpha_loop_overview_20260927.md for methodology.\n\n"
             )
         f.write(f"## {now.strftime('%Y-%m-%d %H:%M UTC')}\n\n{summary}\n\n")
+
+
+def write_research_leads_doc(now: datetime, papers: list):
+    config.RESEARCH_LEADS_DOC_PATH.parent.mkdir(parents=True, exist_ok=True)
+    header_needed = not config.RESEARCH_LEADS_DOC_PATH.exists()
+    with open(config.RESEARCH_LEADS_DOC_PATH, "a", encoding="utf-8") as f:
+        if header_needed:
+            f.write(
+                "# Research leads (arXiv)\n\n"
+                "Append-only. Papers surfaced by research_scout.py that might be "
+                "relevant to this loop's signals. Nothing here is auto-converted "
+                "into a testable signal -- that still requires a human to write "
+                "a new evaluator function in backtest_engine.py.\n\n"
+            )
+        f.write(f"## {now.strftime('%Y-%m-%d %H:%M UTC')}\n\n")
+        for p in papers:
+            f.write(f"- **{p['title']}** ({p['published'][:10]})\n  {p['link']}\n  {p['summary'][:300]}\n\n")
 
 
 def main():
