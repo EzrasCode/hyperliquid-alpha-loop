@@ -61,17 +61,33 @@ numbers/coins, never code. The loop never `eval()`s or `exec()`s anything an
 LLM produces. Adding a genuinely new signal kind requires a human to write a
 new evaluator function in `alpha_loop/backtest_engine.py`.
 
-## Research scouting (arXiv)
+## Research scouting (arXiv, Semantic Scholar, Quantocracy, Reddit, GitHub)
 
-Every hour, alongside idea generation, `research_scout.py` queries arXiv's
-free public API for recent papers in quant-finance categories matching
-keywords relevant to this loop's signals (liquidation, order flow, market
-microstructure, momentum/mean-reversion, cointegration). New papers (deduped
-by arXiv ID) are posted to Discord and appended to
-`docs/research/alpha_loop/research_leads.md`. Google Scholar has no API and
-blocks automated scraping, so arXiv is the free substitute -- and it's
-actually where most of this research shows up first anyway. Same safety
-boundary as idea generation: a paper is a human-readable lead, never
+Every hour, alongside idea generation, `research_scout.py` checks five free,
+ToS-compliant sources for candidate leads matching keywords relevant to this
+loop's signals (liquidation, order flow, market microstructure,
+momentum/mean-reversion, cointegration):
+
+- **arXiv** -- recent papers in quant-finance categories (q-fin.TR/ST/CP).
+- **Semantic Scholar** -- broader academic coverage (journals, SSRN-indexed
+  working papers), also free, no key needed.
+- **Quantocracy** -- a curated daily aggregator of quant-trading blog posts.
+- **Reddit** (r/algotrading, r/quant) -- forum discussion, noisier signal
+  than the above but zero cost.
+- **GitHub** -- newly-updated open-source repos matching trading-strategy
+  keywords, a proxy for what practitioners are actually building.
+
+Google Scholar and X/Twitter search were both considered and excluded:
+Scholar has no API and blocks scraping; X's search API now requires a paid
+tier (~$200/mo). Books, podcasts, and videos were also considered -- there's
+no free/legal way to extract their actual content for an unattended bot
+(YouTube's API only searches titles/descriptions, not what's said in a
+video), so those require a human to read/watch and manually propose the
+resulting idea.
+
+New leads (deduped by `(source, external_id)`) are posted to Discord and
+appended to `docs/research/alpha_loop/research_leads.md`. Same safety
+boundary as idea generation: a lead is a human-readable pointer, never
 auto-converted into a running signal.
 
 ## Deployment

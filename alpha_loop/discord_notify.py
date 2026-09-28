@@ -37,16 +37,16 @@ def send_cycle_summary(cycle: int, summary: str):
         pass
 
 
-def send_research_leads(papers: list):
-    """papers: list of dicts from research_scout.fetch_candidate_papers()."""
+def send_research_leads(leads: list):
+    """leads: list of dicts from research_scout.fetch_all_candidates()."""
     webhook_url = os.getenv("DISCORD_WEBHOOK_URL")
-    if not webhook_url or not papers:
+    if not webhook_url or not leads:
         return
 
     blocks = []
-    for p in papers:
-        snippet = p["summary"][:220] + ("..." if len(p["summary"]) > 220 else "")
-        blocks.append(f"**{p['title']}**\n{snippet}\n{p['link']}")
+    for lead in leads:
+        snippet = lead["summary"][:220] + ("..." if len(lead["summary"]) > 220 else "")
+        blocks.append(f"**[{lead['source']}]** {lead['title']}\n{snippet}\n{lead['link']}")
     description = "\n\n".join(blocks)
     if len(description) > MAX_DESCRIPTION_LEN:
         description = description[:MAX_DESCRIPTION_LEN] + "\n... (truncated)"
@@ -56,7 +56,7 @@ def send_research_leads(papers: list):
         "username": "Alpha Loop",
         "embeds": [
             {
-                "title": f"\U0001f4da New research lead(s) -- {len(papers)} paper(s)",
+                "title": f"\U0001f4da New research lead(s) -- {len(leads)} found",
                 "description": description,
                 "color": 0x3498DB,
             }

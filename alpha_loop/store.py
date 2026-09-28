@@ -64,12 +64,14 @@ CREATE TABLE IF NOT EXISTS outcomes (
 );
 
 CREATE TABLE IF NOT EXISTS research_leads (
-    arxiv_id TEXT PRIMARY KEY,
+    source TEXT NOT NULL,
+    external_id TEXT NOT NULL,
     title TEXT NOT NULL,
     summary TEXT,
     link TEXT,
     published TEXT,
-    discovered_at TEXT NOT NULL
+    discovered_at TEXT NOT NULL,
+    PRIMARY KEY (source, external_id)
 );
 
 CREATE TABLE IF NOT EXISTS cycle_log (
@@ -195,17 +197,17 @@ def record_outcome(conn, event_id, horizon, forward_price, forward_return, net_r
     )
 
 
-def record_research_lead(conn, arxiv_id, title, summary, link, published) -> bool:
-    """Returns True if this is a newly-seen paper, False if already known."""
+def record_research_lead(conn, source, external_id, title, summary, link, published) -> bool:
+    """Returns True if this is a newly-seen lead, False if already known."""
     existing = conn.execute(
-        "SELECT arxiv_id FROM research_leads WHERE arxiv_id = ?", (arxiv_id,)
+        "SELECT 1 FROM research_leads WHERE source = ? AND external_id = ?", (source, external_id)
     ).fetchone()
     if existing:
         return False
     conn.execute(
-        "INSERT INTO research_leads (arxiv_id, title, summary, link, published, discovered_at) "
-        "VALUES (?, ?, ?, ?, ?, ?)",
-        (arxiv_id, title, summary, link, published, now_iso()),
+        "INSERT INTO research_leads (source, external_id, title, summary, link, published, discovered_at) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?)",
+        (source, external_id, title, summary, link, published, now_iso()),
     )
     return True
 

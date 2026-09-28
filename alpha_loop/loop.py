@@ -25,8 +25,8 @@ Each cycle:
   5. Every IDEA_GEN_EVERY_N_CYCLES, ask for new hypothesis parameterizations
      -- tracking not just how many were accepted, but why any were rejected
      or why zero came back.
-  6. Every RESEARCH_SCOUT_EVERY_N_CYCLES, check arXiv for new candidate
-     papers.
+  6. Every RESEARCH_SCOUT_EVERY_N_CYCLES, check arXiv, Semantic Scholar,
+     Quantocracy, Reddit, and GitHub for new candidate leads.
   7. Assemble the structured cycle report (reporting.py), append it to
      cycle_reports.jsonl, write a decision-log line, and post to Discord.
 """
@@ -191,12 +191,12 @@ def run_cycle(api: CachedMoonDevAPI, cycle: int):
 
         new_leads = []
         if cycle % config.RESEARCH_SCOUT_EVERY_N_CYCLES == 0:
-            for paper in research_scout.fetch_candidate_papers():
+            for lead in research_scout.fetch_all_candidates():
                 if store.record_research_lead(
-                    conn, paper["arxiv_id"], paper["title"], paper["summary"],
-                    paper["link"], paper["published"],
+                    conn, lead["source"], lead["external_id"], lead["title"],
+                    lead["summary"], lead["link"], lead["published"],
                 ):
-                    new_leads.append(paper)
+                    new_leads.append(lead)
             if new_leads:
                 write_research_leads_doc(now, new_leads)
                 send_research_leads(new_leads)
@@ -246,21 +246,24 @@ def append_cycle_report_jsonl(report: dict):
         f.write(json.dumps(report, default=str) + "\n")
 
 
-def write_research_leads_doc(now: datetime, papers: list):
+def write_research_leads_doc(now: datetime, leads: list):
     config.RESEARCH_LEADS_DOC_PATH.parent.mkdir(parents=True, exist_ok=True)
     header_needed = not config.RESEARCH_LEADS_DOC_PATH.exists()
     with open(config.RESEARCH_LEADS_DOC_PATH, "a", encoding="utf-8") as f:
         if header_needed:
             f.write(
-                "# Research leads (arXiv)\n\n"
-                "Append-only. Papers surfaced by research_scout.py that might be "
-                "relevant to this loop's signals. Nothing here is auto-converted "
-                "into a testable signal -- that still requires a human to write "
-                "a new evaluator function in backtest_engine.py.\n\n"
+                "# Research leads\n\n"
+                "Append-only. Candidate leads surfaced by research_scout.py from "
+                "arXiv, Semantic Scholar, Quantocracy, and GitHub -- anything that "
+                "might be relevant to this loop's signals (Reddit is defined but "
+                "inactive, see research_scout.py). Nothing here is auto-converted "
+                "into a testable signal -- that still requires a human to write a "
+                "new evaluator function in backtest_engine.py.\n\n"
             )
         f.write(f"## {now.strftime('%Y-%m-%d %H:%M UTC')}\n\n")
-        for p in papers:
-            f.write(f"- **{p['title']}** ({p['published'][:10]})\n  {p['link']}\n  {p['summary'][:300]}\n\n")
+        for lead in leads:
+            published = (lead.get("published") or "")[:10]
+            f.write(f"- **[{lead['source']}]** {lead['title']} ({published})\n  {lead['link']}\n  {lead['summary'][:300]}\n\n")
 
 
 def main():
