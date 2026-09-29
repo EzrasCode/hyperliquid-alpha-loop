@@ -56,3 +56,11 @@ cycle 4 -- events_fired=0 hyp_generated=0 hyp_promoted=0 new_research_leads=0
 · CVD / price divergence (BTC, 1h ticks)     [ 1h] n=2    status=insufficient_n       hit=100% net=+0.00865
 · CVD / price divergence (BTC, 1h ticks)     [ 4h] n=2    status=insufficient_n       hit=100% net=+0.00865
 
+## 2026-09-29 02:33 UTC
+
+cycle 5 -- events_fired=0 hyp_generated=0 hyp_promoted=0 new_research_leads=0
+· CVD / price divergence (BTC, 1h ticks)     [ 5m] n=2    status=insufficient_n       hit=100% net=+0.00865
+· CVD / price divergence (BTC, 1h ticks)     [15m] n=2    status=insufficient_n       hit=100% net=+0.00865
+· CVD / price divergence (BTC, 1h ticks)     [ 1h] n=2    status=insufficient_n       hit=100% net=+0.00865
+· CVD / price divergence (BTC, 1h ticks)     [ 4h] n=2    status=insufficient_n       hit=100% net=+0.00865
+
