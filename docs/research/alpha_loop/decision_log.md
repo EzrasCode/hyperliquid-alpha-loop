@@ -121,3 +121,15 @@ why_no_new_hypotheses: OpenRouter call failed: Error code: 401 - {'error': {'mes
 👀 CVD / price divergence (BTC, 1h ticks)     [ 1h] n=5    status=insufficient_n_but_promising hit= 80% net=+0.00491
 👀 CVD / price divergence (BTC, 1h ticks)     [ 4h] n=5    status=insufficient_n_but_promising hit= 80% net=+0.00491
 
+## 2026-09-30 20:35 UTC
+
+cycle 13 -- events_fired=1 hyp_generated=0 hyp_promoted=0 new_research_leads=0
+👀 CVD / price divergence (BTC, 1h ticks)     [ 5m] n=6    status=insufficient_n_but_promising hit= 83% net=+0.00500
+👀 CVD / price divergence (BTC, 1h ticks)     [15m] n=6    status=insufficient_n_but_promising hit= 83% net=+0.00500
+👀 CVD / price divergence (BTC, 1h ticks)     [ 1h] n=6    status=insufficient_n_but_promising hit= 83% net=+0.00500
+👀 CVD / price divergence (BTC, 1h ticks)     [ 4h] n=6    status=insufficient_n_but_promising hit= 83% net=+0.00500
+· Liquidation cascade momentum (5m concentra [ 5m] n=1    status=insufficient_n       hit=  0% net=-0.00808
+· Liquidation cascade momentum (5m concentra [15m] n=1    status=insufficient_n       hit=  0% net=-0.00808
+· Liquidation cascade momentum (5m concentra [ 1h] n=1    status=insufficient_n       hit=  0% net=-0.00808
+· Liquidation cascade momentum (5m concentra [ 4h] n=1    status=insufficient_n       hit=  0% net=-0.00808
+
