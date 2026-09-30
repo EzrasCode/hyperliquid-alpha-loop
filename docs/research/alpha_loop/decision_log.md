@@ -112,3 +112,12 @@ cycle 11 -- events_fired=1 hyp_generated=0 hyp_promoted=0 new_research_leads=0
 · CVD / price divergence (BTC, 1h ticks)     [ 1h] n=4    status=insufficient_n       hit= 75% net=+0.00280
 · CVD / price divergence (BTC, 1h ticks)     [ 4h] n=4    status=insufficient_n       hit= 75% net=+0.00280
 
+## 2026-09-30 15:53 UTC
+
+cycle 12 -- events_fired=2 hyp_generated=0 hyp_promoted=0 new_research_leads=14
+why_no_new_hypotheses: OpenRouter call failed: Error code: 401 - {'error': {'message': 'User not found.', 'code': 401}}
+👀 CVD / price divergence (BTC, 1h ticks)     [ 5m] n=5    status=insufficient_n_but_promising hit= 80% net=+0.00491
+👀 CVD / price divergence (BTC, 1h ticks)     [15m] n=5    status=insufficient_n_but_promising hit= 80% net=+0.00491
+👀 CVD / price divergence (BTC, 1h ticks)     [ 1h] n=5    status=insufficient_n_but_promising hit= 80% net=+0.00491
+👀 CVD / price divergence (BTC, 1h ticks)     [ 4h] n=5    status=insufficient_n_but_promising hit= 80% net=+0.00491
+
