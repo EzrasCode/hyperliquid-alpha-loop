@@ -145,3 +145,15 @@ cycle 14 -- events_fired=1 hyp_generated=0 hyp_promoted=0 new_research_leads=0
 · Liquidation cascade momentum (5m concentra [ 1h] n=1    status=insufficient_n       hit=  0% net=-0.00808
 · Liquidation cascade momentum (5m concentra [ 4h] n=1    status=insufficient_n       hit=  0% net=-0.00808
 
+## 2026-10-01 06:02 UTC
+
+cycle 15 -- events_fired=2 hyp_generated=0 hyp_promoted=0 new_research_leads=0
+👀 CVD / price divergence (BTC, 1h ticks)     [ 5m] n=8    status=insufficient_n_but_promising hit= 75% net=+0.00431
+👀 CVD / price divergence (BTC, 1h ticks)     [15m] n=8    status=insufficient_n_but_promising hit= 75% net=+0.00431
+👀 CVD / price divergence (BTC, 1h ticks)     [ 1h] n=8    status=insufficient_n_but_promising hit= 75% net=+0.00431
+👀 CVD / price divergence (BTC, 1h ticks)     [ 4h] n=8    status=insufficient_n_but_promising hit= 88% net=+0.00551
+· Liquidation cascade momentum (5m concentra [ 5m] n=1    status=insufficient_n       hit=  0% net=-0.00808
+· Liquidation cascade momentum (5m concentra [15m] n=1    status=insufficient_n       hit=  0% net=-0.00808
+· Liquidation cascade momentum (5m concentra [ 1h] n=1    status=insufficient_n       hit=  0% net=-0.00808
+· Liquidation cascade momentum (5m concentra [ 4h] n=1    status=insufficient_n       hit=  0% net=-0.00808
+
