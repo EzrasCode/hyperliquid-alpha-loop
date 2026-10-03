@@ -253,3 +253,16 @@ cycle 23 -- events_fired=0 hyp_generated=0 hyp_promoted=0 new_research_leads=0
 · Liquidation cascade momentum (5m concentra [ 1h] n=5    status=insufficient_n       hit= 40% net=-0.00047
 · Liquidation cascade momentum (5m concentra [ 4h] n=5    status=insufficient_n       hit= 40% net=-0.00047
 
+## 2026-10-03 02:19 UTC
+
+cycle 24 -- events_fired=1 hyp_generated=0 hyp_promoted=0 new_research_leads=6
+why_no_new_hypotheses: OpenRouter call failed: Error code: 401 - {'error': {'message': 'User not found.', 'code': 401}}
+👀 CVD / price divergence (BTC, 1h ticks)     [ 5m] n=13   status=insufficient_n_but_promising hit= 69% net=+0.00184
+👀 CVD / price divergence (BTC, 1h ticks)     [15m] n=13   status=insufficient_n_but_promising hit= 69% net=+0.00184
+👀 CVD / price divergence (BTC, 1h ticks)     [ 1h] n=13   status=insufficient_n_but_promising hit= 69% net=+0.00184
+👀 CVD / price divergence (BTC, 1h ticks)     [ 4h] n=13   status=insufficient_n_but_promising hit= 77% net=+0.00258
+· Liquidation cascade momentum (5m concentra [ 5m] n=5    status=insufficient_n       hit= 40% net=-0.00047
+· Liquidation cascade momentum (5m concentra [15m] n=5    status=insufficient_n       hit= 40% net=-0.00047
+· Liquidation cascade momentum (5m concentra [ 1h] n=5    status=insufficient_n       hit= 40% net=-0.00047
+· Liquidation cascade momentum (5m concentra [ 4h] n=5    status=insufficient_n       hit= 40% net=-0.00047
+

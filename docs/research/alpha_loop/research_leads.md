@@ -60,3 +60,29 @@ Append-only. Candidate leads surfaced by research_scout.py from arXiv, Semantic 
   https://github.com/CShear/ref-perp-bot
   Reference implementation — perpetual futures trading bot (Hyperliquid). Multi-strategy: whale tracking, funding rate arbitrage, liquidation cascade riding.
 
+## 2026-10-03 02:19 UTC
+
+- **[arxiv]** Shared Models, Selective Trading, and Order Flow (2026-10-01)
+  http://arxiv.org/abs/2610.01897v1
+  We study whether model diversity survives selection into trading. In synthetic markets with a fixed mixture of three language-model families, news presentation changes their representation among submitted orders. At the announcement round, Qwen's share of submitted orders shifts by 48 percentage poi
+
+- **[arxiv]** Social welfare and price discovery in double auction markets (2026-10-01)
+  http://arxiv.org/abs/2610.01562v1
+  The tendency of the double auction mechanism to drive prices to competitive equilibrium has been well documented in laboratory experiments, but the phenomenon has lacked a theoretical explanation. This paper studies dynamic double auctions in a pure exchange economy where agents bid their indifferen
+
+- **[arxiv]** PPO-HRAP: Proximal Policy Optimization with a Hybrid Regime-Aware Policy for Risk-Controlled Trading (2026-10-01)
+  http://arxiv.org/abs/2610.01325v1
+  Reinforcement learning for trading often struggles to balance upside participation with drawdown control. Profit-only policies can collapse toward passive long exposure on upward-drifting assets, while aggressively risk-penalized rewards can become too defensive during volatile periods. This paper p
+
+- **[arxiv]** Beyond Supra-Competitive Outcomes: Collusive Behaviour in Deep Reinforcement Learning for Optimal Execution Games (2026-09-30)
+  http://arxiv.org/abs/2610.00619v1
+  In this paper, we extend earlier findings of supra-competitive outcomes in optimal-execution games by identifying a learned punitive mechanism that deters deviations and provides behavioural evidence of collusion. We investigate this mechanism in a two-player, finite-horizon Almgren-Chriss liquidati
+
+- **[arxiv]** QuantCode Model: Specializing Language Models for Executable Algorithmic Trading Code (2026-09-30)
+  http://arxiv.org/abs/2609.39420v1
+  Large language models are strong general-purpose code generators, but executable algorithmic trading remains a demanding specialization target: a model must translate a natural-language strategy specification into correct program logic for a specialized trading framework, execute on historical data,
+
+- **[quantocracy]** Recent Quant Links from Quantocracy as of 09/30/2026 (Thu, 01 Oc)
+  https://quantocracy.com/recent-quant-links-from-quantocracy-as-of-09302026/
+  <p>This is a summary of links recently featured on Quantocracy as of Wednesday, 09/30/2026. To see our most recent links, visit the Quant Mashup. Read on readers! A New Stage, a New Deadline: Quantpedia Awards 2027 Are Here Again! [Quantpedia] Hello everyone, The Quantpedia Awards are backand this t
+
