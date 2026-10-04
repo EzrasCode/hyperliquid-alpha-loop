@@ -393,3 +393,19 @@ cycle 33 -- events_fired=0 hyp_generated=0 hyp_promoted=0 new_research_leads=0
 · HLP sentiment squeeze (z >= 2.0)           [ 1h] n=1    status=insufficient_n       hit=100% net=+0.00012
 · HLP sentiment squeeze (z >= 2.0)           [ 4h] n=1    status=insufficient_n       hit=100% net=-0.00049
 
+## 2026-10-04 21:44 UTC
+
+cycle 34 -- events_fired=1 hyp_generated=0 hyp_promoted=0 new_research_leads=0
+👀 CVD / price divergence (BTC, 1h ticks)     [ 4h] n=16   status=insufficient_n_but_promising hit= 62% net=+0.00151
+· CVD / price divergence (BTC, 1h ticks)     [ 5m] n=16   status=insufficient_n       hit= 56% net=+0.00091
+· CVD / price divergence (BTC, 1h ticks)     [15m] n=16   status=insufficient_n       hit= 56% net=+0.00091
+· CVD / price divergence (BTC, 1h ticks)     [ 1h] n=16   status=insufficient_n       hit= 56% net=+0.00091
+· Liquidation cascade momentum (5m concentra [ 5m] n=5    status=insufficient_n       hit= 40% net=-0.00047
+· Liquidation cascade momentum (5m concentra [15m] n=5    status=insufficient_n       hit= 40% net=-0.00047
+· Liquidation cascade momentum (5m concentra [ 1h] n=5    status=insufficient_n       hit= 40% net=-0.00047
+· Liquidation cascade momentum (5m concentra [ 4h] n=5    status=insufficient_n       hit= 40% net=-0.00047
+· HLP sentiment squeeze (z >= 2.0)           [ 5m] n=1    status=insufficient_n       hit=100% net=+0.00012
+· HLP sentiment squeeze (z >= 2.0)           [15m] n=1    status=insufficient_n       hit=100% net=+0.00012
+· HLP sentiment squeeze (z >= 2.0)           [ 1h] n=1    status=insufficient_n       hit=100% net=+0.00012
+· HLP sentiment squeeze (z >= 2.0)           [ 4h] n=1    status=insufficient_n       hit=100% net=-0.00049
+
