@@ -86,3 +86,33 @@ Append-only. Candidate leads surfaced by research_scout.py from arXiv, Semantic 
   https://quantocracy.com/recent-quant-links-from-quantocracy-as-of-09302026/
   <p>This is a summary of links recently featured on Quantocracy as of Wednesday, 09/30/2026. To see our most recent links, visit the Quant Mashup. Read on readers! A New Stage, a New Deadline: Quantpedia Awards 2027 Are Here Again! [Quantpedia] Hello everyone, The Quantpedia Awards are backand this t
 
+## 2026-10-05 05:53 UTC
+
+- **[arxiv]** When a Correct Reward Is Not Enough: Diagnosing and Guiding PPO in an Analytically Solved Broker-Trader Game (2026-10-02)
+  http://arxiv.org/abs/2610.03598v1
+  Reinforcement learning (RL) is increasingly used for financial optimal-control problems when complex dynamics make analytical strategies difficult to obtain. There are financial mathematics literactures which provides many solved models whose equations and controls could evaluate and guide learning;
+
+- **[arxiv]** Mixture-of-Experts for Cryptocurrency Order Execution: Training Stability, Tail Risk, and Failure Modes (2026-10-02)
+  http://arxiv.org/abs/2610.03369v1
+  Deep reinforcement-learning policies for order execution can vary substantially across training seeds, so apparent architectural gains may reflect favourable training realisations rather than reproducible properties of the architecture. We evaluate vanilla Double Deep Q-Learning (DDQL), K-means-part
+
+- **[arxiv]** MintEval: Do LLMs Implement the Trading Strategy You Asked For? A Behavioural-Equivalence Benchmark for Natural-Language-to-Strategy Code (2026-10-02)
+  http://arxiv.org/abs/2610.03080v1
+  Large language models are moving from producing trading signals to writing the code that executes them. The failure mode of the second role is silent: generated code runs, a backtest plots, yet the risk logic that the trader described is not the logic being executed. Existing code benchmarks test fu
+
+- **[arxiv]** Axient: Manifest-Bound Evidence for On-Chain Financial Protocols: Seven-Layer Derivation, Correlation, Tamper Rejection, and Reproducible Claim Promotion (2026-10-02)
+  http://arxiv.org/abs/2610.02838v1
+  Hybrid on-chain financial protocols are frequently evaluated with evidence that is individually useful but collectively insufficient: a unit test, transaction receipt, screenshot, service response, or several matching hashes may be presented as proof of a complete workflow even when the layers share
+
+- **[arxiv]** Axient: Canonical Protocol-Graph Composition for Leveraged Event Markets: Single State Authority, Atomic Composition, Durable Sagas, and Exactly-Once Recovery (2026-10-02)
+  http://arxiv.org/abs/2610.02834v1
+  A modular leveraged event-market protocol can contain individually correct contracts for risk approval, positions, debt, settlement evidence, credit pools, junior backstops, reserves, liquidation, and governance while still lacking one authoritative financial execution path. This paper develops a ca
+
+- **[quantocracy]** Recent Quant Links from Quantocracy as of 10/03/2026 (Sun, 04 Oc)
+  https://quantocracy.com/recent-quant-links-from-quantocracy-as-of-10032026/
+  <p>This is a summary of links recently featured on Quantocracy as of Saturday, 10/03/2026. To see our most recent links, visit the Quant Mashup. Read on readers! Buffett&#8217;s be greedy when others are fearful, tested [Quanter Lab] &#34;Be greedy when others are fearful&#34; is Warren Buffett&#039
+
+- **[quantocracy]** Recent Quant Links from Quantocracy as of 10/02/2026 (Sat, 03 Oc)
+  https://quantocracy.com/recent-quant-links-from-quantocracy-as-of-10022026/
+  <p>This is a summary of links recently featured on Quantocracy as of Friday, 10/02/2026. To see our most recent links, visit the Quant Mashup. Read on readers! 897,000 Tests, About 150 Pattern Families, One Confirmed Finding [Krueger Algorithms] The question was simple: what do you find if you forge
+
