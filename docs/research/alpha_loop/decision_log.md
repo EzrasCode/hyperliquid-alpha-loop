@@ -635,3 +635,19 @@ why_no_new_hypotheses: OpenRouter call failed: Error code: 401 - {'error': {'mes
 · HLP sentiment squeeze (z >= 2.0)           [ 1h] n=1    status=insufficient_n       hit=100% net=+0.00012
 · HLP sentiment squeeze (z >= 2.0)           [ 4h] n=1    status=insufficient_n       hit=100% net=-0.00049
 
+## 2026-10-08 10:24 UTC
+
+cycle 49 -- events_fired=2 hyp_generated=0 hyp_promoted=0 new_research_leads=0
+· CVD / price divergence (BTC, 1h ticks)     [ 5m] n=25   status=insufficient_n       hit= 48% net=-0.00069
+· CVD / price divergence (BTC, 1h ticks)     [15m] n=25   status=insufficient_n       hit= 48% net=-0.00069
+· CVD / price divergence (BTC, 1h ticks)     [ 1h] n=25   status=insufficient_n       hit= 48% net=-0.00069
+· CVD / price divergence (BTC, 1h ticks)     [ 4h] n=25   status=insufficient_n       hit= 56% net=-0.00002
+· Liquidation cascade momentum (5m concentra [ 5m] n=5    status=insufficient_n       hit= 40% net=-0.00047
+· Liquidation cascade momentum (5m concentra [15m] n=5    status=insufficient_n       hit= 40% net=-0.00047
+· Liquidation cascade momentum (5m concentra [ 1h] n=5    status=insufficient_n       hit= 40% net=-0.00047
+· Liquidation cascade momentum (5m concentra [ 4h] n=5    status=insufficient_n       hit= 40% net=-0.00047
+· HLP sentiment squeeze (z >= 2.0)           [ 5m] n=1    status=insufficient_n       hit=100% net=+0.00012
+· HLP sentiment squeeze (z >= 2.0)           [15m] n=1    status=insufficient_n       hit=100% net=+0.00012
+· HLP sentiment squeeze (z >= 2.0)           [ 1h] n=1    status=insufficient_n       hit=100% net=+0.00012
+· HLP sentiment squeeze (z >= 2.0)           [ 4h] n=1    status=insufficient_n       hit=100% net=-0.00049
+
