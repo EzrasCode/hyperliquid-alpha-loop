@@ -116,3 +116,29 @@ Append-only. Candidate leads surfaced by research_scout.py from arXiv, Semantic 
   https://quantocracy.com/recent-quant-links-from-quantocracy-as-of-10022026/
   <p>This is a summary of links recently featured on Quantocracy as of Friday, 10/02/2026. To see our most recent links, visit the Quant Mashup. Read on readers! 897,000 Tests, About 150 Pattern Families, One Confirmed Finding [Krueger Algorithms] The question was simple: what do you find if you forge
 
+## 2026-10-08 02:57 UTC
+
+- **[arxiv]** A Hawkes Microfoundation for Multitype Inverse Gaussian Subordinators (2026-10-07)
+  http://arxiv.org/abs/2610.10525v1
+  We provide an event-level Hawkes microfoundation for a multitype inverse-Gaussian stochastic clock. We show that the event counts and integrated intensities of nearly critical multivariate linear Hawkes processes converge jointly to a multivariate pure-jump subordinator when reproduction delays have
+
+- **[arxiv]** SOTA: Stock Options Trading Agents Guided by Option-Implied Return Distributions (2026-10-07)
+  http://arxiv.org/abs/2610.10407v1
+  As option markets grow and AI advances, agentic systems for option trading are gaining increasing attention. Language-model-based agents can reason over contextual information such as news, but option trading presents a particularly challenging decision problem: a single stock can have thousands of 
+
+- **[arxiv]** On Bonart's interpretation of the Square-Root Impact Law (2026-10-07)
+  http://arxiv.org/abs/2610.10053v1
+  The square-root impact law (SRIL), $I = Yσ\sqrt{Q/V}$, bundles two facts that a single mechanism must explain at once: a shape (impact proportional to square-root of traded volume $Q$) and an amplitude ($Y=O(1)$, independent of the participation rate $\varphi$). Bonart has recently proposed an elega
+
+- **[arxiv]** Modelling Regime Shifts in Continuous Intraday Electricity Markets with State-dependent Hawkes Processes (2026-10-06)
+  http://arxiv.org/abs/2610.08169v1
+  The growing importance of intraday trading in Europe, driven by the increasing penetration of renewable energy sources, has led to higher volatility and periods of market stress. Understanding how order flow behaves under varying liquidity conditions requires models that adapt to the state of the ma
+
+- **[arxiv]** A Finite Bid--Ask Spread from Replenishment Displaced from the Quote (2026-10-06)
+  http://arxiv.org/abs/2610.07985v1
+  We give a unified analytic account of a finite bid--ask spread in a two-field reaction--diffusion order book. The model retains separate bid and ask densities in operational time, with diffusion, cancellation, reaction and external order creation. On the symmetric equal-coefficient branch, the imbal
+
+- **[quantocracy]** Recent Quant Links from Quantocracy as of 10/05/2026 (Tue, 06 Oc)
+  https://quantocracy.com/recent-quant-links-from-quantocracy-as-of-10052026/
+  <p>This is a summary of links recently featured on Quantocracy as of Monday, 10/05/2026. To see our most recent links, visit the Quant Mashup. Read on readers! A Century of Meme Stocks and the Price of Coordination [Quantpedia] Meme stocks are commonly studied through social-media activity, but this
+
